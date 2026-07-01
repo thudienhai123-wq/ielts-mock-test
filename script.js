@@ -1,3 +1,7 @@
+// ===================== EmailJS Configuration =====================
+emailjs.init('8DfgstEuznmmhcPAZ');
+const SERVICE_ID = 'service_l68sw2j';
+
 // ===================== GLOBAL VARIABLES =====================
 let testData = {
     passage: "Click the Admin Panel (⚙️) to paste your passage here...",
@@ -298,13 +302,13 @@ function resetTimer() {
 function submitTest() {
     clearInterval(timerInterval);
     
-    const studentName = prompt('Enter your name:', '');
+    const studentName = prompt('Enter your full name:', '');
     if (!studentName) {
         alert('Name is required to submit the test.');
         return;
     }
     
-    const studentEmail = prompt('Enter your email:', '');
+    const studentEmail = prompt('Enter your email address:', '');
     if (!studentEmail) {
         alert('Email is required to submit the test.');
         return;
@@ -313,7 +317,7 @@ function submitTest() {
     // Format results
     const results = formatResults(studentName, studentEmail);
     
-    // Send to email using Formspree
+    // Send email
     sendResultsToEmail(results, studentName, studentEmail);
 }
 
@@ -339,30 +343,42 @@ function formatResults(studentName, studentEmail) {
 }
 
 function sendResultsToEmail(results, studentName, studentEmail) {
-    // Using Formspree or similar service
-    // You can replace this with your own backend
+    // Prepare email parameters
+    const templateParams = {
+        to_email: 'laihongthu.2002@gmail.com',
+        student_name: studentName,
+        student_email: studentEmail,
+        submission_time: new Date().toLocaleString(),
+        answers: results,
+        subject: `IELTS Test Submission - ${studentName}`
+    };
     
-    // Option 1: Show results in a popup for now
-    console.log('Test Results:', results);
-    console.log('Student:', studentName, studentEmail);
-    console.log('Instructor Email: laithongthu.2002@gmail.com');
+    // Show loading
+    const submitBtn = document.querySelector('.submit-btn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
     
-    // Option 2: Send via Formspree (requires setup)
-    const formData = new FormData();
-    formData.append('email', 'laithongthu.2002@gmail.com');
-    formData.append('student_name', studentName);
-    formData.append('student_email', studentEmail);
-    formData.append('results', results);
-    
-    // Example: Send to a backend service
-    // fetch('your-backend-url', {
-    //     method: 'POST',
-    //     body: formData
-    // })
-    
-    alert(`Test submitted successfully!\n\nStudent: ${studentName}\nEmail: ${studentEmail}\n\nResults will be sent to: laithongthu.2002@gmail.com`);
-    
-    // Log results to console for verification
-    console.log('---FULL RESULTS---');
-    console.log(results);
+    // Send email using EmailJS
+    emailjs.send(SERVICE_ID, 'template_test_results', templateParams)
+        .then((response) => {
+            console.log('Email sent successfully:', response);
+            alert(`✅ Test submitted successfully!\n\nStudent: ${studentName}\nEmail: ${studentEmail}\n\nResults sent to: laihongthu.2002@gmail.com`);
+            
+            // Reset
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        })
+        .catch((error) => {
+            console.error('Failed to send email:', error);
+            alert(`⚠️ Test submitted but email sending failed.\n\nPlease save your answers:\n\n${results}`);
+            
+            // Show results in console
+            console.log('---STUDENT ANSWERS---');
+            console.log(results);
+            
+            // Reset
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
 }
