@@ -3,114 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS Mock Test - All Skills</title>
+    <title>IELTS Academic Reading</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- SKILL SELECTION PAGE -->
-    <div id="skillSelection" class="skill-selection-container">
-        <div class="skill-selection-content">
-            <h1>IELTS Mock Test</h1>
-            <p>Select a skill to begin your test</p>
-            <div class="skill-buttons">
-                <button onclick="startSkill('listening')" class="skill-btn listening-btn">
-                    <span class="skill-icon">🎧</span>
-                    <span class="skill-name">Listening</span>
-                    <span class="skill-time">~30 minutes</span>
-                </button>
-                <button onclick="startSkill('reading')" class="skill-btn reading-btn">
-                    <span class="skill-icon">📖</span>
-                    <span class="skill-name">Reading</span>
-                    <span class="skill-time">~60 minutes</span>
-                </button>
-                <button onclick="startSkill('writing')" class="skill-btn writing-btn">
-                    <span class="skill-icon">✍️</span>
-                    <span class="skill-name">Writing</span>
-                    <span class="skill-time">~60 minutes</span>
-                </button>
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="admin-panel">
+        <button onclick="toggleAdminPanel()" class="admin-toggle">⚙️ Admin Panel</button>
+        <div id="adminContent" class="admin-content" style="display: none;">
+            <h2>Admin - Edit Test Content</h2>
+            
+            <div class="admin-section">
+                <h3>Edit Passage</h3>
+                <textarea id="passageInput" placeholder="Paste your passage here..." style="width: 100%; height: 200px; padding: 10px; font-family: Arial;"></textarea>
+                <button onclick="savePassage()">Save Passage</button>
+            </div>
+
+            <div class="admin-section">
+                <h3>Edit Questions (JSON format)</h3>
+                <textarea id="questionsInput" placeholder="Paste questions in JSON format..." style="width: 100%; height: 200px; padding: 10px; font-family: monospace;"></textarea>
+                <button onclick="saveQuestions()">Save Questions</button>
+            </div>
+
+            <div class="admin-section">
+                <h3>Question Format Guide</h3>
+                <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">
+[
+  {
+    "number": 1,
+    "text": "What is the main topic?",
+    "type": "text"
+  },
+  {
+    "number": 2,
+    "text": "Choose the best answer:",
+    "type": "multiple-choice",
+    "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"]
+  },
+  {
+    "number": 3,
+    "text": "True or False?",
+    "type": "true-false"
+  }
+]
+                </pre>
             </div>
         </div>
     </div>
 
     <!-- TEST INTERFACE -->
-    <div id="testInterface" class="test-interface" style="display: none;">
+    <div id="testContainer" class="test-container">
+        <!-- HEADER -->
         <header class="test-header">
             <div class="header-left">
-                <h2 id="skillTitle">IELTS Mock Test</h2>
-                <p id="sectionInfo"></p>
+                <h1>IELTS Academic Reading</h1>
+            </div>
+            <div class="header-center">
+                <span>Time Remaining <span id="timerDisplay">60:00</span></span>
             </div>
             <div class="header-right">
-                <div class="timer-container">
-                    <span class="timer-label">Time Remaining:</span>
-                    <span id="timer" class="timer">60:00</span>
-                </div>
                 <button onclick="submitTest()" class="submit-btn">Submit Test</button>
             </div>
         </header>
 
-        <div class="test-container">
-            <!-- LEFT PANEL - CONTENT -->
-            <div class="content-panel">
-                <!-- Listening Content -->
-                <div id="listeningContent" class="content-section" style="display: none;">
-                    <div id="listeningSection"></div>
-                </div>
-
-                <!-- Reading Content -->
-                <div id="readingContent" class="content-section" style="display: none;">
-                    <div id="passageContent"></div>
-                </div>
-
-                <!-- Writing Content -->
-                <div id="writingContent" class="content-section" style="display: none;">
-                    <div id="writingSection"></div>
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- LEFT PANEL - PASSAGE -->
+            <div class="passage-panel">
+                <h2>Reading Passage</h2>
+                <div id="passageContent" class="passage-text">
+                    <p>Passage will appear here...</p>
                 </div>
             </div>
 
-            <!-- RIGHT PANEL - QUESTIONS/ANSWERS -->
-            <div class="question-panel">
-                <!-- Listening Questions -->
-                <div id="listeningQuestions" class="questions-section" style="display: none;">
-                    <h3>Questions</h3>
-                    <div id="listeningQuestionsContainer"></div>
-                </div>
-
-                <!-- Reading Questions -->
-                <div id="readingQuestions" class="questions-section" style="display: none;">
-                    <h3>Questions</h3>
-                    <div id="readingQuestionsContainer"></div>
-                </div>
-
-                <!-- Writing Editor -->
-                <div id="writingEditor" class="writing-editor" style="display: none;">
-                    <h3 id="writingTaskTitle"></h3>
-                    <div class="word-count">
-                        <span>Word Count: <strong id="wordCount">0</strong> / <span id="wordTarget">150</span></span>
-                    </div>
-                    <textarea id="writingTextarea" placeholder="Write your answer here..." maxlength="5000"></textarea>
+            <!-- RIGHT PANEL - QUESTIONS -->
+            <div class="questions-panel">
+                <h2>Questions</h2>
+                <div id="questionsContent" class="questions-container">
+                    <p>Questions will appear here...</p>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation -->
-        <div class="navigation-bar">
-            <button onclick="previousQuestion()" class="nav-btn">← Previous</button>
-            <div id="questionNumbers" class="question-numbers"></div>
-            <button onclick="nextQuestion()" class="nav-btn">Next →</button>
-        </div>
-    </div>
-
-    <!-- RESULTS PAGE -->
-    <div id="resultsPage" class="results-container" style="display: none;">
-        <div class="results-content">
-            <h1>Test Submitted Successfully</h1>
-            <p>Your answers have been sent to your instructor's email.</p>
-            <div class="results-info">
-                <p><strong>Skill Tested:</strong> <span id="resultSkill"></span></p>
-                <p><strong>Questions Answered:</strong> <span id="resultAnswered"></span></p>
-                <p><strong>Submission Time:</strong> <span id="resultTime"></span></p>
+        <!-- NAVIGATION NUMBERS -->
+        <div class="question-numbers-bar">
+            <button onclick="previousQuestion()" class="nav-btn">Previous</button>
+            <div id="questionNumbers" class="question-numbers">
+                <!-- Question numbers will be generated here -->
             </div>
-            <button onclick="location.reload()" class="restart-btn">Take Another Test</button>
+            <button onclick="nextQuestion()" class="nav-btn">Next</button>
         </div>
     </div>
 
